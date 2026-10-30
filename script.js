@@ -166,6 +166,30 @@
     mx.addEventListener("click",close);
     addEventListener("keydown",function(e){if(e.key==="Escape")close()});
   })();
+  /* barisan logo berjalan: digandakan sampai memenuhi layar supaya loop mulus, berhenti saat kursor di atas logo */
+  (function(){
+    var t=document.getElementById("stkTrack");if(!t)return;
+    var base=Array.prototype.slice.call(t.children);
+    base.forEach(function(n,i){n.style.animationDelay=(-i*.55)+"s"});
+    function build(){
+      Array.prototype.slice.call(t.querySelectorAll(".stk-clone")).forEach(function(n){n.remove()});
+      var W=t.offsetWidth;if(!W)return;
+      var copies=Math.ceil((window.innerWidth+W)/W);
+      for(var k=1;k<copies;k++)base.forEach(function(n){var c=n.cloneNode(true);c.classList.add("stk-clone");c.setAttribute("aria-hidden","true");c.tabIndex=-1;t.appendChild(c)});
+      t.style.setProperty("--stk-w",W+"px");
+      t.style.setProperty("--stk-d",Math.max(10,W/55)+"s");
+    }
+    t.querySelectorAll("img").forEach(function(i){
+      var hide=function(){i.style.display="none";build()};
+      if(i.complete&&!i.naturalWidth)i.style.display="none";else i.addEventListener("error",hide);
+    });
+    build();addEventListener("load",build);
+    var rt;addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(build,200)});
+    t.addEventListener("pointerover",function(e){if(e.target.closest(".stk-item"))t.classList.add("paused")});
+    t.addEventListener("pointerout",function(e){var r=e.relatedTarget;if(!r||!r.closest||!r.closest(".stk-item"))t.classList.remove("paused")});
+    t.addEventListener("focusin",function(){t.classList.add("paused")});
+    t.addEventListener("focusout",function(){t.classList.remove("paused")});
+  })();
   var up=document.getElementById("up");
   addEventListener("scroll",function(){up.classList.toggle("show",scrollY>700)},{passive:true});
   up.onclick=function(){scrollTo({top:0,behavior:"smooth"})};
